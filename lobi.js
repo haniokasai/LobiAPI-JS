@@ -132,13 +132,20 @@ function get_string(source, pattern, end_pattern) {
     return substr(source, start, end - start);
 }
 
+email="foo";
+password="bar";
+
 $.ajax({
     url: 'https://lobi.co/signin',
     beforeSend: function(xhr) {
-
-        xhr.setRequestHeader("Authorization", "Bearer 6QXNMEMFHNY4FJ5ELNFMP5KRW52WFXN5")
     }, success: function(data){
-        alert(data);
-        //process the JSON data etc
+        csrf_token =　get_string(data,csrf_token, '"');
+        post_data = 'csrf_token='+csrf_token+'&email='+mail+'&password='+password;
+        posted =http_post('https://lobi.co/signin', post_data);
+        if(posted.indexOf('ログインに失敗しました')== -1){
+            return true;
+        }else{
+            return false;
+        }
     }
 })
