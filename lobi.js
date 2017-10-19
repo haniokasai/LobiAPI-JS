@@ -1,10 +1,10 @@
 //https://stackoverflow.com/questions/25515936/perform-curl-request-in-javascript
 
-csrf_token = '<input type="hidden" name="csrf_token" value="';
-authenticity_token = '<input name="authenticity_token" type="hidden" value="';
-redirect_after_login = '<input name="redirect_after_login" type="hidden" value="';
-oauth_token = '<input id="oauth_token" name="oauth_token" type="hidden" value="';
-twitter_redirect_to_lobi = '<a class="maintain-context" href="';
+var csrf_token = '<input type="hidden" name="csrf_token" value="';
+var authenticity_token = '<input name="authenticity_token" type="hidden" value="';
+var redirect_after_login = '<input name="redirect_after_login" type="hidden" value="';
+var oauth_token = '<input id="oauth_token" name="oauth_token" type="hidden" value="';
+var twitter_redirect_to_lobi = '<a class="maintain-context" href="';
 
 function strpos (haystack, needle, offset) {
     //  discuss at: http://locutus.io/php/strpos/
@@ -132,20 +132,74 @@ function get_string(source, pattern, end_pattern) {
     return substr(source, start, end - start);
 }
 
-email="foo";
-password="bar";
 
-$.ajax({
-    url: 'https://lobi.co/signin',
-    beforeSend: function(xhr) {
-    }, success: function(data){
-        csrf_token =　get_string(data,csrf_token, '"');
-        post_data = 'csrf_token='+csrf_token+'&email='+mail+'&password='+password;
-        posted =http_post('https://lobi.co/signin', post_data);
-        if(posted.indexOf('ログインに失敗しました')== -1){
-            return true;
-        }else{
-            return false;
+
+function http_get(url) {
+    var json_data;
+    $.ajax({
+        type: 'GET',
+        cache: false,
+        async: false, // 非同期オプションを無効にして同期リクエストを行う *1
+        url: url,
+        beforeSend: function(xhr) {
+            //xhr.setRequestHeader('Connection:', 'keep-alive');
+            //xhr.setRequestHeader('Accept: ', 'application/json, text/plain, */*');
+            //xhr.setRequestHeader('Accept-Language: ', 'ja,en-US;q=0.8,en;q=0.6');
+            //xhr.setRequestHeader('User-Agent: ', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36'
+        }, success: function(data){
+            json_data= data;
+        },error : function(XMLHttpRequest, textStatus, errorThrown) {
+            alert("error:"+textStatus);
         }
     }
-})
+        // *1 同期リクエストは処理が終わるまでブラウザをロックしてしまいます。
+     );
+
+
+
+    return json_data;
+}
+
+function http_post(url, post_data) {
+    var result;
+
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: post_data,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader('Connection:', 'keep-alive');
+            xhr.setRequestHeader('Accept: ', 'application/json, text/plain, */*');
+            xhr.setRequestHeader('Accept-Language: ', 'ja,en-US;q=0.8,en;q=0.6');
+            //xhr.setRequestHeader('User-Agent: ', 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36'
+        }, success: function (data) {
+            result = data;
+        }, error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert("error:"+textStatus);
+        }
+    });
+    return data;
+}
+
+var email="foo";
+var password="bar";
+
+
+var source = http_get('https://lobi.co/signin');
+alert(source);
+var csrf =　get_string(source,csrf_token, '"');
+var post_data = {
+    csrf_token : csrf,
+    email: email,
+    password :password
+};
+
+
+var posted =http_post('https://lobi.co/signin', post_data);
+if(posted.indexOf('ログインに失敗しました')== -1){
+    alert("a");
+    //return true;
+}else{
+    alert("b");
+}
